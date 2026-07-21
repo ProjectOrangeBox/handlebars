@@ -1,14 +1,14 @@
 <?php
 
-namespace peels\handlebars;
+namespace orange\handlebars;
 
 use LightnCandy\LightnCandy;
-use peels\handlebars\exceptions\FileNotFound;
-use peels\handlebars\exceptions\InvalidValue;
-use peels\handlebars\exceptions\ViewNotFound;
-use peels\handlebars\exceptions\PartialNotFound;
-use peels\handlebars\exceptions\DirectoryNotFound;
-use peels\handlebars\exceptions\Handlebars as ExceptionsHandlebars;
+use orange\handlebars\exceptions\FileNotFound;
+use orange\handlebars\exceptions\InvalidValue;
+use orange\handlebars\exceptions\ViewNotFound;
+use orange\handlebars\exceptions\PartialNotFound;
+use orange\handlebars\exceptions\DirectoryNotFound;
+use orange\handlebars\exceptions\Handlebars as ExceptionsHandlebars;
 
 /**
  * Handlebars Parser

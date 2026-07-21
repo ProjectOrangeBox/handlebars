@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "peels\\handlebars\\": "src/"
+            "orange\\handlebars\\": "src/"
         }
     },
     "minimum-stability": "dev",

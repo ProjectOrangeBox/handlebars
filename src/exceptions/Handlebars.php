@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace peels\handlebars\exceptions;
+namespace orange\handlebars\exceptions;
 
 use Exception;
 

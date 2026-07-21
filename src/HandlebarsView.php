@@ -1,10 +1,10 @@
 <?php
 
-namespace peels\handlebars;
+namespace orange\handlebars;
 
 use orange\framework\abstract\ViewAbstract;
 use orange\framework\helpers\DirectorySearch;
-use peels\handlebars\exceptions\ViewNotFound;
+use orange\handlebars\exceptions\ViewNotFound;
 use orange\framework\interfaces\DataInterface;
 use orange\framework\interfaces\ViewInterface;
 use orange\framework\interfaces\DirectorySearchInterface;

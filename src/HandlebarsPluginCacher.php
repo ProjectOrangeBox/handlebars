@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace peels\handlebars;
+namespace orange\handlebars;
 
-use peels\handlebars\exceptions\HelperNotFound;
-use peels\handlebars\exceptions\DirectoryNotFound;
+use orange\handlebars\exceptions\HelperNotFound;
+use orange\handlebars\exceptions\DirectoryNotFound;
 
 class HandlebarsPluginCacher
 {

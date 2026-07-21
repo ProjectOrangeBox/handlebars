@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace peels\handlebars\exceptions;
+namespace orange\handlebars\exceptions;
 
-use peels\handlebars\exceptions\Handlebars;
+use orange\handlebars\exceptions\Handlebars;
 
 class FileNotFound extends Handlebars
 {

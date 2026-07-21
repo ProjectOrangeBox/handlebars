@@ -5,7 +5,7 @@ Standalone Handlebars template renderer built on [zordius/lightncandy](https://g
 ## Example
 
 ```php
-use peels\handlebars\Handlebars;
+use orange\handlebars\Handlebars;
 
 $handlebars = new Handlebars([
     'cache directory' => '/tmp/handlebars-cache',
