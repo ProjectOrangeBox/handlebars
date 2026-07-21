@@ -1,0 +1,72 @@
+<h1>{{title}}</h1>
+{{#each projects}}
+	<h3>{{name}}</h3>
+	<h4>Assignees</h4>
+	<ul>
+	{{#each assignees}}
+		<li>{{name}}</li>
+	{{/each}}
+	</ul>
+{{/each}}
+
+{{#each projects}}
+	<h3>{{name}}</h3>
+	<h4>Assignees</h4>
+	<ul>
+	{{#each contributors}}
+		<li>{{name}} {{age}}</li>
+	{{/each}}
+	</ul>
+{{/each}}
+
+<p>setting!</p>
+{{set name="age" value=title}}
+
+<p>{{get name="age"}}</p>
+
+<p>{{#uppercase}}{{age}}{{/uppercase}}</p>
+
+<p>{{#blocker}}This is the blocker content{{/blocker}}</p>
+
+<p>{{lex_uppercase foo="456" bar=title}}</p>
+
+<p>Phone Number: {{snippet name="phone_number"}}</p>
+
+<p>{{snippet-copyright}}</p>
+<p>{{{snippet-a name="link"}}}link</a></p>
+
+
+
+{{#each projects}}
+	<h3>{{name}}</h3>
+	<h4>Assignees</h4>
+	<ul>
+	{{#each assignees}}
+		<li>{{name}} {{age}}</li>
+	{{/each}}
+	</ul>
+{{/each}}
+
+<p>setting!</p>
+{{set name="age" value=page_title}}
+
+<p>{{get name="age"}}</p>
+
+<p>{{uppercase}}</p>
+
+<p>{{#uppercase cache="60"}}{{age}}{{/uppercase}}</p>
+
+<p>{{#blocker}}This is the blocker content{{/blocker}}</p>
+
+<p>Lex Uppercase {{lex_uppercase foo="456" bar=page_title}}</p>
+
+<p>Phone Number: {{snippet name="phone_number"}}</p>
+
+<p>{{snippet-copyright}}</p>
+<p>{{{snippet-a name="link"}}}link</a></p>
+
+<p>{{#bear cookies="sugar"}}{{page_title}}{{/bear}}</p>
+
+{{exp:channel:entries channel="personnel"}}
+
+{{electric}}

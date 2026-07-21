@@ -1,0 +1,41 @@
+<p>
+{{#exp:channel:entries channel="news" limit="15" category="2" entry_id="147"}}
+
+<h3>The title is "{{title}}"</h3>
+
+<p>The body is "{{body}}"</p>
+
+<p><strong>get name="age" {{get name="age"}}</strong></p>
+<p><strong>get name="foo" {{get name="foo"}}</strong></p>
+
+<div class="date">Posted on {{format:date entry_date format="Y-m-d H:i:s"}}</div>
+
+{{/exp:channel:entries}}
+</p>
+
+<p>
+	<table class="table table-striped table-bordered">
+		<tr>
+			<th>Index</th>
+			<th>Name</th>
+			<th>Variable</th>
+			<th>Value</th>
+			<th>Odd/Even</th>
+			<th>First</th>
+			<th>Last</th>
+			<th>Action</th>
+		</tr>
+	{{#exp:query sql="select * from orange_settings"}}
+		<tr class="{{#if query_odd}}oddman{{else}}evenman{{/if}}">
+			<td>{{query_index_row}}</td>
+			<td>{{name}}</td>
+			<td>{{variable}}</td>
+			<td>{{value}}</td>
+			<td>{{#exp:uppercase cache="60"}}{{#if query_odd}}odd{{else}}even{{/if}}{{/exp:uppercase}}</td>
+			<td>{{query_first_row}}</td>
+			<td>{{query_last_row}}</td>
+			<td><a href="/admin/content/snippets/edit/{{uid}}">Edit</a></td>
+		</tr>
+	{{/exp:query}}
+	</table>
+</p>

@@ -1,0 +1,93 @@
+{{> demo/header}}
+
+{{hbp:deferred id="userinfo"}}
+
+<p>page_title = {{page_title}}</p>
+<p>Clock: [{{now}}]</p>
+<p>{{#q:cache_demo cache="5"}}This will be cached for 5 minutes [{{now}}] {{/q:cache_demo}}</p>
+
+<p>{{#exp:block}}This is the blocker content{{/exp:block}}</p>
+
+{{hbp:deferred id="injecttable"}}
+
+{{set name="age" value=page_title}}
+{{set name="foo" value="bar"}}
+
+{{#each projects}}
+	<h3>{{name}}</h3>
+	<h4>Assignees</h4>
+	<ul>
+	{{#each assignees}}
+		<li>{{name}} - {{age}}</li>
+	{{/each}}
+	</ul>
+{{/each}}
+
+{{#iif page_title "=" "Current Projects"}}
+	True Do This
+{{else}}
+	False Do This
+{{/iif}}
+
+<p>
+{{#iif 1 "=" 1}}
+	1 equals 1 with else
+{{else}}
+	else 1 equals 1
+{{/iif}}
+</p>
+
+<p>
+{{#iif 1 "=" 2}}
+	1 equals 1
+{{else}}
+	else 1 equals 1
+{{/iif}}
+</p>
+
+<strong>
+{{hbp:deferred id="hello_what"}}
+</strong>
+
+
+<p>Deferred Image Load: {{hbp:deferred id="someimage"}}</p>
+
+<p>
+{{#iif 1 "=" 1}}
+	single 1 equals 1
+{{/iif}}
+</p>
+
+<p>
+{{#iif 1 "!=" 2}}
+	1 does not equal 1
+{{/iif}}
+</p>
+
+<p>
+{{#is_even 2}}
+	<b>I'm even!</b>
+{{/is_even}}
+<p>
+
+<p>
+{{#is_odd 1}}
+	<b>I'm a Odd Ball!</b>
+{{/is_odd}}
+<p>
+
+<p>
+{{#is_odd 2}}
+	<b>I'm a Odd Ball!</b>
+{{else}}
+	<i>I'm Even Steven!</i>
+{{/is_odd}}
+<p>
+
+<p>{{#exp:lowercase}}UPPERCASE <- NOT! {{/exp:lowercase}}</p>
+
+<p>{{#exp:uppercase}}{{page_title}}{{/exp:uppercase}}</p>
+
+{{> cats }}
+
+{{> demo/footer }}

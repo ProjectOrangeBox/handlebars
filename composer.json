@@ -1,0 +1,31 @@
+{
+    "name": "orange/handlebars",
+    "description": "Handlebars view integration with plugin caching.",
+    "type": "library",
+    "homepage": "https://github.com/ProjectOrangeBox/handlebars",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Don Myers",
+            "email": "donmyers@me.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/ProjectOrangeBox/handlebars/issues",
+        "source": "https://github.com/ProjectOrangeBox/handlebars"
+    },
+    "require": {
+        "php": ">=8.4",
+        "orange/framework": "dev-main"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "peels\\handlebars\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

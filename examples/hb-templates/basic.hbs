@@ -1,0 +1,22 @@
+{{> header}}
+<p>page_title = {{page_title}}</p>
+<p>Clock: [{{now}}]</p>
+<p>
+{{#exp:channel:entries channel="news" limit="15" category="2" entry_id="147"}}
+
+<h3>The title is "{{title}}"</h3>
+
+<p>The body is "{{body}}"</p>
+
+<div class="date">Posted on {{format:date entry_date format="Y-m-d H:i:s"}}</div>
+
+{{/exp:channel:entries}}
+</p>
+<p>
+{{#if_eq page_title "Current Projects"}}
+	True Do This
+{{else}}
+	False Do This
+{{/if_eq}}
+</p>
+{{> footer}}
