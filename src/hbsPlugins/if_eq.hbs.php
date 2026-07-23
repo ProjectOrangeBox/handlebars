@@ -8,6 +8,8 @@
 {{/if_eq}}
 */
 $helpers['if_eq'] = function ($value1, $value2, $options) {
+    $return = '';
+
     if ($value1 == $value2) {
         $return = $options['fn']();
     } elseif ($options['inverse'] instanceof \Closure) {

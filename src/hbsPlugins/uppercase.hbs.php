@@ -7,6 +7,4 @@ if (!$output = ci()->handlebars->cache($options)) {
     ci()->handlebars->cache($options,$output);
 }
 */
-$helpers['exp:uppercase'] = function ($options) {
-    return strtoupper($options['fn']($options['_this']));
-};
+$helpers['exp:uppercase'] = (fn($options) => strtoupper((string) $options['fn']($options['_this'])));

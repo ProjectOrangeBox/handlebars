@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace orange\handlebars;
 
+use Throwable;
 use LightnCandy\LightnCandy;
 use orange\handlebars\exceptions\FileNotFound;
 use orange\handlebars\exceptions\InvalidValue;
@@ -90,19 +93,20 @@ class Handlebars
         // we need the "compiled" helpers
         // this loads all of the helpers in the helpers array and builds a single file
         // handlebars can use. Handlebars only includes the helpers used.
-        $this->helpers = (new HandlebarsPluginCacher($this->config))->get();
+        $this->helpers = new HandlebarsPluginCacher($this->config)->get();
     }
 
     public function change(string $name, mixed $value): self
     {
-        if (!in_array($name, $this->changeable)) {
+        // $changeable maps a property name => the validator function for its value
+        if (!array_key_exists($name, $this->changeable)) {
             throw new InvalidValue($name);
         }
 
-        $function = str_replace(' ', '', lcfirst(ucwords($this->changeable[$name])));
+        $validator = $this->changeable[$name];
 
-        if (!$function($value)) {
-            throw new InvalidValue($value);
+        if (!$validator($value)) {
+            throw new InvalidValue($name);
         }
 
         $this->$name = $value;
@@ -147,11 +151,24 @@ class Handlebars
             'helpers' => $this->helpers, /* Add the plugins (handlebars.js calls helpers) */
             'renderex' => '/* ' . $comment . ' compiled @ ' . date('Y-m-d h:i:s e') . ' */', /* Added to compiled PHP */
             'delimiters' => $this->delimiters,
-            'partialresolver' => function ($context, $name) {
-                /* partial & template handling */
-                return ($this->partialExists($name)) ? file_get_contents($this->findPartial($name)) : '<!-- partial named "' . $name . '" could not be found --!>';
-            },
+            'partialresolver' => /* partial & template handling */
+            fn($context, $name) => ($this->partialExists($name)) ? $this->resolvePartial($name) : '<!-- partial named "' . $name . '" could not be found -->',
         ]);
+    }
+
+    /**
+     * Resolve a registered partial to its template source.
+     *
+     * A partial value may be either a literal template string (e.g.
+     * "<footer>{{year}}</footer>") or an absolute path to a .hbs file. If the
+     * value points at an existing file it is read from disk, otherwise it is
+     * treated as the template source itself.
+     */
+    protected function resolvePartial(string $name): string
+    {
+        $partial = $this->findPartial($name);
+
+        return is_file($partial) ? file_get_contents($partial) : $partial;
     }
 
     public function addView(string $name, string $filePath): self
@@ -175,8 +192,8 @@ class Handlebars
         return isset($this->templates[$name]);
     }
 
-    /* a partial is a string */
-    public function addPartial(string $name, string $string): Handlebars
+    /* a partial is either a literal template string or an absolute path to a .hbs file */
+    public function addPartial(string $name, string $string): self
     {
         $this->partials[$name] = $string;
 
@@ -205,7 +222,7 @@ class Handlebars
 
         $config['forceCompile'] = true;
 
-        $this->helpers = (new HandlebarsPluginCacher($config))->get();
+        $this->helpers = new HandlebarsPluginCacher($config)->get();
 
         return $this;
     }
@@ -213,7 +230,7 @@ class Handlebars
     /**
      * save a compiled file
      */
-    public function saveCompileFile(string $compiledFile, string $templatePhp): int
+    public function saveCompileFile(string $compiledFile, string $templatePhp): int|false
     {
         /* write out the compiled file */
         return file_put_contents_atomic($compiledFile, '<?php ' . $templatePhp . '?>');
@@ -221,27 +238,51 @@ class Handlebars
 
     /**
      * parseTemplate
+     *
+     * Compiles the template to a cached PHP file and returns that file's path.
+     * The cache is (re)built when forceCompile is on, when the compiled file is
+     * missing, or - for file templates - when the source .hbs file has been
+     * modified since it was last compiled.
      */
     public function parseView(string $template, bool $isFile): string
     {
-        /* build the compiled file path */
-        $compiledFile = $this->cacheDirectory . '/' . $this->hbCachePrefix . sha1($template) . '.php';
+        /* build the compiled file path (discriminate files from strings so a
+           string whose content equals a view name can't collide with it) */
+        $prefix = $isFile ? 'file:' : 'string:';
+        $compiledFile = $this->cacheDirectory . '/' . $this->hbCachePrefix . sha1($prefix . $template) . '.php';
 
-        /* always compile in development or not save or compile if doesn't exist */
-        if ($this->forceCompile || !file_exists($compiledFile)) {
+        $sourceFile = $isFile ? $this->findView($template) : null;
+
+        if ($this->needsCompile($compiledFile, $sourceFile)) {
             /* compile the template as either file or string */
             if ($isFile) {
-                $source = file_get_contents($this->findView($template));
+                $source = file_get_contents($sourceFile);
                 $comment = $template;
             } else {
                 $source = $template;
                 $comment = 'parseString_' . sha1($template);
             }
 
-            $this->saveCompileFile($compiledFile, $this->compile($source, $comment));
+            if ($this->saveCompileFile($compiledFile, $this->compile($source, $comment)) === false) {
+                throw new ExceptionsHandlebars('Could not write compiled template to "' . $compiledFile . '".');
+            }
         }
 
         return $compiledFile;
+    }
+
+    /**
+     * Decide whether a template needs (re)compiling.
+     */
+    protected function needsCompile(string $compiledFile, ?string $sourceFile): bool
+    {
+        /* always compile in development, or when no cache exists yet */
+        if ($this->forceCompile || !file_exists($compiledFile)) {
+            return true;
+        }
+
+        /* recompile when the source file has changed since it was last compiled */
+        return $sourceFile !== null && filemtime($sourceFile) > filemtime($compiledFile);
     }
 
     /**
@@ -266,12 +307,14 @@ class Handlebars
         /* send data into the magic void... */
         try {
             $output = $templatePHP($data);
-        } catch (ExceptionsHandlebars $e) {
-            echo '<h1>Handlebars Run Error:</h1><pre>';
-            var_dump($e);
-            logMsg('DEBUG', __METHOD__, $e);
-            echo '</pre>';
-            exit(1);
+        } catch (Throwable $e) {
+            /* log when running inside the framework, but never echo/exit from a
+               library - wrap the low-level error and let the caller handle it */
+            if (function_exists('logMsg')) {
+                logMsg('error', __METHOD__ . ': ' . $e->getMessage());
+            }
+
+            throw new ExceptionsHandlebars('Handlebars run error: ' . $e->getMessage(), 0, $e);
         }
 
         return $output;

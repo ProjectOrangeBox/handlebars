@@ -8,6 +8,8 @@
 {{/if_ne}}
 */
 $helpers['if_ne'] = function ($value1, $value2, $options) {
+    $return = '';
+
     if ($value1 != $value2) {
         $return = $options['fn']();
     } elseif ($options['inverse'] instanceof \Closure) {

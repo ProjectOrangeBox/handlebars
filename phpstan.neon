@@ -1,0 +1,24 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    # The framework's global helper functions (logMsg, container, config, ...)
+    # are loaded at runtime via dynamic include_once, not through composer's
+    # autoloader, so PHPStan can't see them without an explicit bootstrap. These
+    # live in the sibling framework package; the .phpstan-bootstrap.php stub
+    # define()s the constants (__ROOT__, ENVIRONMENT, ...) the real runtime sets
+    # before config files load.
+    bootstrapFiles:
+        - ../framework/src/helpers/helpers.php
+        - ../framework/src/helpers/errors.php
+        - ../framework/src/helpers/wrappers.php
+        - ../framework/.phpstan-bootstrap.php
+    # A package's own ignoreErrors are added per package as needed; without this
+    # a not-yet-matched pattern in the shared skeleton would itself fail the run.
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        -
+            # DI container services are resolved through a magic __get(), so
+            # PHPStan has no way to know which property names are valid - this is
+            # the framework's intended DI pattern, not a bug.
+            message: '#^Access to an undefined property orange\\framework\\interfaces\\ContainerInterface::\$#'

@@ -35,7 +35,7 @@ class unitTestHelper extends TestCase
         $closure($value);
     }
 
-    protected function callMethod(string $method, array $args = null, $instance = null)
+    protected function callMethod(string $method, ?array $args = null, $instance = null)
     {
         $instance = ($instance) ?? $this->instance;
 
@@ -47,5 +47,35 @@ class unitTestHelper extends TestCase
     protected function stripInvisible(string $string): string
     {
         return preg_replace('/[\x00-\x1F\x7F]/u', '', $string);
+    }
+
+    /* create a fresh temporary directory and return its absolute path */
+    protected function makeTempDir(string $prefix = 'hb-'): string
+    {
+        $dir = sys_get_temp_dir() . '/' . $prefix . bin2hex(random_bytes(6));
+
+        mkdir($dir, 0777, true);
+
+        return $dir;
+    }
+
+    /* recursively remove a directory created by makeTempDir() */
+    protected function removeTempDir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        foreach (scandir($dir) as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+
+            $path = $dir . '/' . $entry;
+
+            is_dir($path) ? $this->removeTempDir($path) : unlink($path);
+        }
+
+        rmdir($dir);
     }
 }

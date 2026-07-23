@@ -1,0 +1,18 @@
+{{> header}}
+<main>
+  <h1>Hello {{name}}!</h1>
+
+  <p>You have {{length items}} item(s):</p>
+  <ul>
+    {{#each items}}
+    <li>{{capitalize this}}</li>
+    {{/each}}
+  </ul>
+
+  {{#if_gt score 50}}
+  <p class="pass">Passing score: {{format:number score decimals=1}}</p>
+  {{else}}
+  <p class="fail">Needs work.</p>
+  {{/if_gt}}
+</main>
+{{> footer}}
