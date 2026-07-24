@@ -31,18 +31,16 @@ class HandlebarsPluginCacher
             $combined  = '<?php' . PHP_EOL . '/*' . PHP_EOL . 'DO NOT MODIFY THIS FILE' . PHP_EOL . 'Written: ' . date('Y-m-d H:i:s T') . PHP_EOL . '*/' . PHP_EOL . PHP_EOL;
 
             /* find all of the plugin "services" */
-            if (is_array($this->pluginFiles)) {
-                foreach ($this->pluginFiles as $path) {
-                    if (!file_exists($path)) {
-                        throw new HelperNotFound($path);
-                    }
-
-                    $pluginSource  = php_strip_whitespace($path);
-                    $pluginSource  = trim(str_replace(['<?php', '<?', '?>'], '', $pluginSource));
-                    $pluginSource  = trim('/* ' . $path . ' */' . PHP_EOL . $pluginSource) . PHP_EOL . PHP_EOL;
-
-                    $combined .= $pluginSource;
+            foreach ($this->pluginFiles as $path) {
+                if (!file_exists($path)) {
+                    throw new HelperNotFound($path);
                 }
+
+                $pluginSource  = php_strip_whitespace($path);
+                $pluginSource  = trim(str_replace(['<?php', '<?', '?>'], '', $pluginSource));
+                $pluginSource  = trim('/* ' . $path . ' */' . PHP_EOL . $pluginSource) . PHP_EOL . PHP_EOL;
+
+                $combined .= $pluginSource;
             }
 
             /* save to the cache directory on this machine (in a multi-machine env each will just recreate this locally) */
