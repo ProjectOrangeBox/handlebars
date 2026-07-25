@@ -1,0 +1,24 @@
+<?php
+
+namespace LightnCandy;
+
+/**
+ * Corrects LightnCandy's own @param on compile().
+ *
+ * The upstream phpdoc says array<string, array|string|integer>, but the library
+ * documents (and requires) callables for the 'helpers' and 'partialresolver'
+ * options - see https://github.com/zordius/lightncandy#compile-options. Without
+ * this, every call that registers a helper or a partial resolver looks like a
+ * type error. The native signature is untyped, so nothing here widens anything.
+ */
+class LightnCandy extends Flags
+{
+    /**
+     * @param string $template
+     * @param array<string, array|int|string|callable> $options
+     * @return string|false
+     */
+    public static function compile($template, $options = array('flags' => self::FLAG_BESTPERFORMANCE))
+    {
+    }
+}

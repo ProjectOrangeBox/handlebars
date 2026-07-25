@@ -20,7 +20,8 @@
         "zordius/lightncandy": "1.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^13.2"
+        "phpunit/phpunit": "^13.2",
+        "orange/testkit": "dev-master"
     },
     "autoload": {
         "psr-4": {

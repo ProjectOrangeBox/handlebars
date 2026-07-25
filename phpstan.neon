@@ -8,6 +8,10 @@ parameters:
     # live in the sibling framework package; the .phpstan-bootstrap.php stub
     # define()s the constants (__ROOT__, ENVIRONMENT, ...) the real runtime sets
     # before config files load.
+    # LightnCandy's compile() @param understates what the library accepts - the
+    # stub restores the real contract instead of ignoring the call site.
+    stubFiles:
+        - stubs/LightnCandy.stub
     bootstrapFiles:
         - ../framework/src/helpers/helpers.php
         - ../framework/src/helpers/errors.php

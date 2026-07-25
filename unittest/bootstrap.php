@@ -34,4 +34,3 @@ foreach (['helpers.php', 'errors.php', 'wrappers.php'] as $helperFile) {
     }
 }
 
-require __DIR__ . '/unitTestHelper.php';
