@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace orange\handlebars;
 
 use orange\framework\abstract\ViewAbstract;
-use orange\framework\helpers\DirectorySearch;
 use orange\handlebars\exceptions\ViewNotFound;
 use orange\framework\interfaces\DataInterface;
 use orange\framework\interfaces\ViewInterface;
-use orange\framework\interfaces\DirectorySearchInterface;
 
 class HandlebarsView extends ViewAbstract implements ViewInterface
 {
@@ -17,41 +15,43 @@ class HandlebarsView extends ViewAbstract implements ViewInterface
 
     protected function __construct(array $config, ?DataInterface $data = null)
     {
-        parent::__construct($config, $data, null);
+        parent::__construct($config, $data);
 
         // use the ViewAbstract temp directory for the cache directory if one isn't provided
         if (!isset($this->config['cache directory'])) {
             $this->config['cache directory'] = $this->tempDirectory;
         }
 
-        // replace the view search with one scoped to our handlebars template directories
-        if (isset($this->config['template directories'])) {
-            $this->search = new DirectorySearch([
-                'directories' => $this->config['template directories'],
-                'extension' => $this->config['template extension'] ?? $this->config['extension'] ?? '.hbs',
-                'recursive' => true,
-                'pend' => DirectorySearchInterface::FIRST,
-            ]);
-        }
-
         $this->handlebars = new Handlebars($this->config);
     }
 
+    /**
+     * Render a compiled Handlebars template.
+     *
+     * This used to keep a DirectorySearch of its own, scoped to the configured
+     * template directories, because .hbs templates live somewhere other than
+     * the PHP views. Finding them is no longer a view engine's business: a
+     * caller resolves the path - through a ViewFinder configured for templates,
+     * or any other way - and hands it over.
+     *
+     * Handlebars addresses its templates by name through an internal registry,
+     * so the path doubles as the registry key. It is unique by construction and
+     * stable across renders, which is all the key has to be.
+     *
+     * @param string $viewFile Absolute path to the .hbs template
+     */
     #[\Override]
-    public function render(string $view = '', array $data = [], array $options = []): string
+    public function render(string $viewFile = '', array $data = [], array $options = []): string
     {
-        if (!$this->handlebars->viewExists($view)) {
-            // let's see if we can locate it and add it!
-            $foundView = $this->search->findFirst($view);
-
-            if ($foundView) {
-                $this->handlebars->addView($view, $foundView);
-            } else {
-                throw new ViewNotFound($view);
+        if (!$this->handlebars->viewExists($viewFile)) {
+            if (!is_file($viewFile)) {
+                throw new ViewNotFound($viewFile);
             }
+
+            $this->handlebars->addView($viewFile, $viewFile);
         }
 
-        return $this->handlebars->render($view, $this->data($data));
+        return $this->handlebars->render($viewFile, $this->data($data));
     }
 
     #[\Override]
