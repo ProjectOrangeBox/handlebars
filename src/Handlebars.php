@@ -40,21 +40,27 @@ use orange\handlebars\exceptions\Handlebars as ExceptionsHandlebars;
 
 class Handlebars
 {
+    /** @var array<string, mixed> */
     protected array $config;
 
     // these are passed as COMPLETE arrays
     // if it's not in here it doesn't exist
+    /** @var array<string, string> view name => absolute path */
     protected array $templates;
+    /** @var array<string, string> partial name => absolute path or source */
     protected array $partials;
+    /** @var array<string, callable> helper name => the closure implementing it */
     protected array $helpers;
 
     protected string $cacheDirectory;
+    /** @var array<array-key, string> */
     protected array $delimiters;
     protected int $flags;
     protected bool $forceCompile;
     protected string $hbCachePrefix;
     protected string $extension;
 
+    /** @var array<string, callable-string> property name => the is_* function that validates it */
     protected array $changeable = [
         'templates' => 'is_array',
         'partials' => 'is_array',
@@ -71,6 +77,8 @@ class Handlebars
      * Constructor - Sets Handlebars Preferences
      *
      * The constructor can be passed an array of config values
+     *
+     * @param array<string, mixed> $config
      */
     public function __construct(array $config)
     {
@@ -119,6 +127,8 @@ class Handlebars
      *
      * Parses pseudo-variables contained in the specified template view,
      * replacing them with the data in the second param
+     *
+     * @param array<string, mixed> $data
      */
     public function render(string $view = '', array $data = []): string
     {
@@ -130,6 +140,8 @@ class Handlebars
      *
      * Parses pseudo-variables contained in the specified string,
      * replacing them with the data in the second param
+     *
+     * @param array<string, mixed> $data
      */
     public function renderString(string $string, array $data = []): string
     {
@@ -146,7 +158,7 @@ class Handlebars
     public function compile(string $templateSource, string $comment = ''): string
     {
         /* Compile it into php magic! Thank you zordius https://github.com/zordius/lightncandy */
-        return LightnCandy::compile($templateSource, [
+        $compiled = LightnCandy::compile($templateSource, [
             'flags' => $this->flags, /* compiler flags */
             'helpers' => $this->helpers, /* Add the plugins (handlebars.js calls helpers) */
             'renderex' => '/* ' . $comment . ' compiled @ ' . date('Y-m-d h:i:s e') . ' */', /* Added to compiled PHP */
@@ -154,6 +166,15 @@ class Handlebars
             'partialresolver' => /* partial & template handling */
             fn($context, $name) => ($this->partialExists($name)) ? $this->resolvePartial($name) : '<!-- partial named "' . $name . '" could not be found -->',
         ]);
+
+        // LightnCandy returns false when the template will not compile; this
+        // method is declared string, so the alternative is a TypeError that
+        // says nothing about the template
+        if ($compiled === false) {
+            throw new ExceptionsHandlebars('Could not compile template' . ($comment !== '' ? ' "' . $comment . '"' : '') . '.');
+        }
+
+        return $compiled;
     }
 
     /**
@@ -168,7 +189,18 @@ class Handlebars
     {
         $partial = $this->findPartial($name);
 
-        return is_file($partial) ? file_get_contents($partial) : $partial;
+        if (!is_file($partial)) {
+            return $partial;
+        }
+
+        // an unreadable partial file is a broken template, not an empty one
+        $source = file_get_contents($partial);
+
+        if ($source === false) {
+            throw new ExceptionsHandlebars('Could not read partial "' . $partial . '".');
+        }
+
+        return $source;
     }
 
     public function addView(string $name, string $filePath): self
@@ -256,7 +288,18 @@ class Handlebars
         if ($this->needsCompile($compiledFile, $sourceFile)) {
             /* compile the template as either file or string */
             if ($isFile) {
+                // $sourceFile is only null when $isFile is false, but nothing
+                // ties the two together for the reader or the analyser
+                if ($sourceFile === null) {
+                    throw new ExceptionsHandlebars('Could not locate view "' . $template . '".');
+                }
+
                 $source = file_get_contents($sourceFile);
+
+                if ($source === false) {
+                    throw new ExceptionsHandlebars('Could not read view "' . $sourceFile . '".');
+                }
+
                 $comment = $template;
             } else {
                 $source = $template;
@@ -287,6 +330,8 @@ class Handlebars
 
     /**
      * run
+     *
+     * @param array<string, mixed> $data
      */
     public function run(string $compiledFile, array $data): string
     {

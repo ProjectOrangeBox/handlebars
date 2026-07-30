@@ -14,5 +14,6 @@ $helpers['json'] = function ($value, $options) {
         $flags |= JSON_PRETTY_PRINT;
     }
 
-    return new \LightnCandy\SafeString(json_encode($value, $flags));
+    // json_encode() returns false on failure and SafeString takes a string
+    return new \LightnCandy\SafeString(json_encode($value, $flags | JSON_THROW_ON_ERROR));
 };

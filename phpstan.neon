@@ -1,5 +1,5 @@
 parameters:
-    level: 5
+    level: 8
     paths:
         - src
     # The framework's global helper functions (logMsg, container, config, ...)

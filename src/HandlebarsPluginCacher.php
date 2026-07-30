@@ -9,11 +9,16 @@ use orange\handlebars\exceptions\DirectoryNotFound;
 
 class HandlebarsPluginCacher
 {
+    /** @var array<string, callable> helper name => closure */
     protected array $plugins;
     protected string $cacheDirectory;
     protected bool $forceCompile;
+    /** @var list<string> absolute paths of the plugin files that were loaded */
     protected array $pluginFiles;
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(array $config)
     {
         // fall back to globals only when they exist so this stays usable standalone
@@ -72,6 +77,9 @@ class HandlebarsPluginCacher
         return array_any($this->pluginFiles, fn($path) => file_exists($path) && filemtime($path) > $cacheTime);
     }
 
+    /**
+     * @return array<string, callable>
+     */
     public function get(): array
     {
         return $this->plugins;

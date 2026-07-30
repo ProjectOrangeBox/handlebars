@@ -8,7 +8,8 @@ $in is a reference to the data array sent in
 $helpers['set'] = function ($options) use (&$in) {
     //$in[$options['hash']['name']] = $options['hash']['value'];
 
-    $in = array_replace($in, $options['hash']);
+    // $in starts life null until the first set, and array_replace takes arrays
+    $in = array_replace($in ?? [], $options['hash']);
 
     return '';
 };
