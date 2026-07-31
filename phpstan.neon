@@ -8,10 +8,6 @@ parameters:
     # live in the sibling framework package; the .phpstan-bootstrap.php stub
     # define()s the constants (__ROOT__, ENVIRONMENT, ...) the real runtime sets
     # before config files load.
-    # LightnCandy's compile() @param understates what the library accepts - the
-    # stub restores the real contract instead of ignoring the call site.
-    stubFiles:
-        - stubs/LightnCandy.stub
     bootstrapFiles:
         - ../framework/src/helpers/helpers.php
         - ../framework/src/helpers/errors.php
@@ -21,6 +17,21 @@ parameters:
     # a not-yet-matched pattern in the shared skeleton would itself fail the run.
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
+        -
+            # LightnCandy's own @param on compile() says
+            # array<string, array|string|integer>, but the library documents and
+            # requires callables for the 'helpers' and 'partialresolver' options
+            # - see https://github.com/zordius/lightncandy#compile-options. The
+            # native signature is untyped, so nothing is actually being violated.
+            #
+            # This was a stubFile until 2026-07-31. A stub replaces the class
+            # definition, so it had to repeat `extends Flags` - and PHPStan
+            # could not resolve that parent when the package is installed on its
+            # own, which is how CI sees it. Worse, in the webapp's vendor layout
+            # the stub was never applied at all: breaking its parent on purpose
+            # still reported no errors. One ignore behaves the same either way.
+            message: '#^Parameter \#2 \$options of static method LightnCandy\\LightnCandy\:\:compile\(\) expects array#'
+            path: src/Handlebars.php
         -
             # DI container services are resolved through a magic __get(), so
             # PHPStan has no way to know which property names are valid - this is
