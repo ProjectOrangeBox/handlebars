@@ -16,7 +16,7 @@ BIN=../../bin
 checks=(
   "$BIN/phpcbf"
   "$BIN/rector process"
-  "$BIN/phpstan analyse --memory-limit=1G"
+  "$BIN/phpstan analyse --memory-limit=1G --debug"
 )
 
 # only run the test suite when this package ships one
